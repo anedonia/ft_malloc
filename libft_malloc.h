@@ -7,6 +7,8 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <stdlib.h>
+#define ALIGNMENT 16
+#define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 
 struct s_meta_chunk;
 
@@ -18,10 +20,10 @@ typedef struct s_meta_chunk {
 } t_meta_chunk;
 
 typedef struct s_base{
-	t_meta_chunk	*tiny_chunk_list;
-	t_meta_chunk	*small_chunk_list;
-	t_meta_chunk	*large_chunk_list;
-	int				initialized;
+	struct s_meta_chunk	*tiny_chunk_list;
+	struct s_meta_chunk	*small_chunk_list;
+	struct s_meta_chunk	*large_chunk_list;
+	int					initialized;
 } t_base;
 
 void	show_alloc_mem();
