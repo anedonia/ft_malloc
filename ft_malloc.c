@@ -1,8 +1,6 @@
 #define TINY_SIZE 64
 #define SMALL_SIZE 1024
 
-
-
 #include "libft_malloc.h"
 
 t_base chunk_base;

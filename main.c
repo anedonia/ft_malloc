@@ -53,8 +53,58 @@ void int_tests(void){
 	ft_printf("--------------------------------------------------------------------\n");
 }
 
+void free_tests(void) {
+    int *ptr_1 = ft_malloc(sizeof(int));
+    int *ptr_2 = ft_malloc(sizeof(int));
+    int *ptr_3 = ft_malloc(sizeof(int));
+    int *ptr_4 = ft_malloc(sizeof(int));
+
+    *ptr_1 = 12;
+    *ptr_2 = 34;
+    *ptr_3 = 56;
+    *ptr_4 = 78;
+
+    ft_free(ptr_2);
+    ft_free(ptr_4);
+
+    int *ptr_5 = ft_malloc(sizeof(int));
+    int *ptr_6 = ft_malloc(sizeof(int));
+
+    *ptr_5 = 90;
+    *ptr_6 = 100;
+
+    ft_printf("--------------------------------------------------------------------\n");
+
+    ft_printf("Checking if freed memory is reused correctly:\n");
+    if (*ptr_1 == 12 && *ptr_3 == 56 && *ptr_5 == 90 && *ptr_6 == 100) {
+        printf(GREEN "PASS" RESET "\n\n");
+    } else {
+        printf(RED "FAIL" RESET "\n\n");
+    }
+
+    ft_printf("Checking if new allocations have different addresses:\n");
+    if (ptr_5 != ptr_1 && ptr_5 != ptr_3 && ptr_6 != ptr_1 && ptr_6 != ptr_3 && ptr_5 != ptr_6) {
+        printf(GREEN "PASS" RESET "\n\n");
+    } else {
+        printf("ptr_1: %p, ptr_3: %p, ptr_5: %p, ptr_6: %p\n", ptr_1, ptr_3, ptr_5, ptr_6);
+        printf(RED "FAIL" RESET "\n\n");
+    }
+
+    ft_printf("Checking memory alignment for new allocations:\n");
+    if (((size_t)ptr_5 % ALIGNMENT == 0) && ((size_t)ptr_6 % ALIGNMENT == 0)) {
+        printf(GREEN "PASS" RESET ": All new pointers are aligned to %d bytes\n\n", ALIGNMENT);
+    } else {
+        printf(RED "FAIL" RESET ": New pointers are not properly aligned\n\n");
+        printf("ptr_5: %p (aligned: %s)\n", ptr_5, ((size_t)ptr_5 % ALIGNMENT == 0) ? "yes" : "no");
+        printf("ptr_6: %p (aligned: %s)\n", ptr_6, ((size_t)ptr_6 % ALIGNMENT == 0) ? "yes" : "no");
+    }
+
+    ft_printf("--------------------------------------------------------------------\n");
+}
+
 int main (void){
 	int_tests();
+	free_tests();
 
 	
 
