@@ -53,8 +53,14 @@ clean:
 test: all
 	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
 	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
-	./test $(TARGET)
-	@rm -f main.o 
+	ulimit -v 1048576; ./test $(TARGET)
+	@rm -f main.o test
+
+vtest: all
+	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
+	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
+	valgrind -s ./test $(TARGET)
+	@rm -f main.o vtest
 
 # Clean up all generated files, including the static library
 fclean: clean

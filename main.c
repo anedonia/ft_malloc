@@ -106,7 +106,5 @@ int main (void){
 	int_tests();
 	free_tests();
 
-	
-
 	show_alloc_mem();
 }

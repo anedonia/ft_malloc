@@ -4,9 +4,19 @@
 #include "./libft/libft.h"
 #include "./printf/ft_printf.h"
 #include <sys/mman.h>
+#include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+#ifdef __linux__
+#define PAGESIZE sysconf(_SC_PAGESIZE)
+#elif defined(__APPLE__) && defined(__MACH__)
+#define PAGESIZE sysconf(_SC_PAGESIZE)
+#else
+#error "Unsupported operating system"
+#endif
+
 #define ALIGNMENT 16
 #define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 
@@ -23,6 +33,8 @@ typedef struct s_base{
 	struct s_meta_chunk	*tiny_chunk_list;
 	struct s_meta_chunk	*small_chunk_list;
 	struct s_meta_chunk	*large_chunk_list;
+	size_t 				limit;
+	size_t				page_in_use;
 	int					initialized;
 } t_base;
 

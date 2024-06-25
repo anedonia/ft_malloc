@@ -1,19 +1,31 @@
 #define TINY_SIZE 64
 #define SMALL_SIZE 1024
+#define _GNU_SOURCE
 
 #include "libft_malloc.h"
 
 t_base chunk_base;
 
-void init_base(void)
+int init_base(void)
 {
 	if (!chunk_base.initialized)
 	{
+		struct rlimit limit;
+		if (getrlimit(RLIMIT_AS, &limit) == 0)
+		{
+			if (limit.rlim_cur == RLIM_INFINITY)
+				chunk_base.limit = -1;
+			else
+				chunk_base.limit = limit.rlim_cur / PAGESIZE;
+		}
+		else 
+			return 0;
 		chunk_base.tiny_chunk_list = NULL;
 		chunk_base.small_chunk_list = NULL;
 		chunk_base.large_chunk_list = NULL;
 		chunk_base.initialized = 1;
 	}
+	return 1;
 }
 
 t_meta_chunk *find_chunck(size_t size){
@@ -67,7 +79,8 @@ t_meta_chunk *add_chunk(size_t size) {
 }
 
 void *ft_malloc(size_t size) {
-	init_base();
+	if (!init_base())
+		return NULL;
 	t_meta_chunk *chunk;
 
 	// chunk = (find_chunck(size));
