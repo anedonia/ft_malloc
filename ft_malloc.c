@@ -7,7 +7,7 @@
 
 // #define SMALL_ALLOCS 1000
 // #define TINY_ALLOCS 3000
-#define TINY_ALLOCS 10
+#define TINY_ALLOCS 20
 #define SMALL_ALLOCS 10
 
 
@@ -61,6 +61,10 @@ void init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_al
     }
 }
 
+// void *add_block(){
+
+// }
+
 void retard_init(){
 	chunk_base.tiny_chunk_list = NULL;
 	chunk_base.small_chunk_list = NULL;
@@ -100,7 +104,7 @@ int init_base(void)
 			return 0;
 		}
 		ft_memset(ptr_one, 0, total_size);
-		chunk_base.page_in_use += total_size;
+		chunk_base.mem_in_use += total_size;
 
 		total_chunk_size = (sizeof(t_meta_chunk) + SMALL_SIZE) * SMALL_ALLOCS;
 		total_size = (total_chunk_size + PAGESIZE -1) & ~(PAGESIZE - 1);
@@ -114,7 +118,7 @@ int init_base(void)
 			return 0;
 		}
 		ft_memset(ptr_two, 0, total_size);
-		chunk_base.page_in_use += total_size;
+		chunk_base.mem_in_use += total_size;
 
 		init_chunks_list(ptr_one, &chunk_base.tiny_chunk_list , TINY_SIZE, TINY_ALLOCS);
 		init_chunks_list(ptr_two, &chunk_base.small_chunk_list ,SMALL_SIZE, SMALL_ALLOCS);
@@ -135,11 +139,21 @@ t_meta_chunk *find_chunck(size_t size){
 	else if (size < SMALL_SIZE)
 		current = chunk_base.small_chunk_list;
 	else
-		return NULL;
+		current = chunk_base.large_chunk_list;
 	while (current && !(current->free && current->size >= size)){
+		void *data_ptr = (void *)((char *)current + sizeof(t_meta_chunk));
+		data_ptr = align_memory(data_ptr);
+		ft_printf("this chunk at	: %p is free :%d size : %d\n",
+			(char *)data_ptr, 
+			current->free, current->size);	
 		current = current->next;
 	}
 	if (current){
+		void *data_ptr = (void *)((char *)current + sizeof(t_meta_chunk));
+		data_ptr = align_memory(data_ptr);
+		ft_printf("chunk selected	: %p is free :%d size : %d\n\n",
+			(char *)data_ptr,
+			current->free, current->size);
 		current->free = 0;
 	}
 	return current;
@@ -148,7 +162,8 @@ t_meta_chunk *find_chunck(size_t size){
 
 t_meta_chunk *add_chunk(size_t size) {
 	size = ALIGN(size);
-	size_t total_size = size + sizeof(t_meta_chunk) + (ALIGNMENT - 1);
+	size_t total_chunk_size = size + sizeof(t_meta_chunk) + (ALIGNMENT - 1);
+	size_t total_size = (total_chunk_size + PAGESIZE -1) & ~(PAGESIZE - 1);
 
 	void * ptr = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 	if (ptr == MAP_FAILED){
@@ -156,21 +171,22 @@ t_meta_chunk *add_chunk(size_t size) {
 		return NULL;
 	}
 	ft_memset(ptr, 0, total_size);
+	chunk_base.mem_in_use += total_size;
 
 	//align the ptr correctly
 	void *aligned_ptr = (void*)(((size_t)ptr + sizeof(t_meta_chunk) + (ALIGNMENT -1)) & ~(ALIGNMENT - 1));
 	t_meta_chunk *chunk = (t_meta_chunk *)aligned_ptr - 1;
-	chunk->size = size;
+	chunk->size = total_size;
 	chunk->free = 0;
 	chunk->next = NULL;
 
-	add_back(chunk, &(chunk_base.tiny_chunk_list));
+	add_back(chunk, &(chunk_base.large_chunk_list));
 	return (chunk);
 }
 
 void *ft_malloc(size_t size) {
-	if (!init_base()){
-		ft_printf("hello\n");
+	if (!init_base() || size == 0){
+		ft_printf("init error or size 0\n");
 		return NULL;
 	}
 	t_meta_chunk *chunk = NULL;

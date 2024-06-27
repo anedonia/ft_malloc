@@ -36,10 +36,11 @@ typedef struct s_base{
 	struct s_meta_chunk	*small_chunk_list;
 	struct s_meta_chunk	*large_chunk_list;
 	size_t 				limit;
-	size_t				page_in_use;
+	size_t				mem_in_use;
 	int					initialized;
 } t_base;
 
+void*	align_memory(void* ptr);
 void	show_alloc_mem();
 void	ft_free(void *ptr);
 void	*ft_malloc(size_t size);
