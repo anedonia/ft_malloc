@@ -1,6 +1,7 @@
 #ifndef LIBFT_MALLOC_H
 #define LIBFT_MALLOC_H
 
+#define _GNU_SOURCE
 #include "./libft/libft.h"
 #include "./printf/ft_printf.h"
 #include <sys/mman.h>
@@ -8,6 +9,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifdef __linux__
 #define PAGESIZE sysconf(_SC_PAGESIZE)

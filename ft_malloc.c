@@ -1,61 +1,150 @@
 #define TINY_SIZE 64
 #define SMALL_SIZE 1024
-#define _GNU_SOURCE
+
+// #define TINY_SIZE 100000000000
+// #define SMALL_SIZE 1024
+
+
+// #define SMALL_ALLOCS 1000
+// #define TINY_ALLOCS 3000
+#define TINY_ALLOCS 10
+#define SMALL_ALLOCS 10
+
 
 #include "libft_malloc.h"
 
 t_base chunk_base;
 
-int init_base(void)
+void add_back(t_meta_chunk *new, t_meta_chunk **head)
 {
-	if (!chunk_base.initialized)
+	if (*head == NULL)
 	{
-		struct rlimit limit;
-		if (getrlimit(RLIMIT_AS, &limit) == 0)
-		{
-			if (limit.rlim_cur == RLIM_INFINITY)
-				chunk_base.limit = -1;
-			else
-				chunk_base.limit = limit.rlim_cur / PAGESIZE;
-		}
-		else 
-			return 0;
-		chunk_base.tiny_chunk_list = NULL;
-		chunk_base.small_chunk_list = NULL;
-		chunk_base.large_chunk_list = NULL;
-		chunk_base.initialized = 1;
-	}
-	return 1;
-}
-
-t_meta_chunk *find_chunck(size_t size){
-	t_meta_chunk *current;
-
-	if (size < TINY_SIZE)
-		current = chunk_base.tiny_chunk_list;
-	else if (size > SMALL_SIZE)
-		current = chunk_base.small_chunk_list;
-	else
-		return NULL;
-	while (current && !(current->free && current->size >= size)){
-		current = current->next;
-	}
-	return current;
-}
-
-void add_back(t_meta_chunk *new) {
-	t_meta_chunk **head = &(chunk_base.tiny_chunk_list);
-	if (*head == NULL){
 		ft_printf("new head\n");
 		*head = new;
 	}
-	else {
+	else
+	{
 		t_meta_chunk *current = *head;
 		while (current->next)
 			current = current->next;
 		current->next = new;
 	}
 }
+
+void* align_memory(void* ptr) {
+    uintptr_t addr = (uintptr_t)ptr;
+    if (addr % ALIGNMENT != 0) {
+        addr += ALIGNMENT - (addr % ALIGNMENT);
+    }
+    return (void*)addr;
+}
+
+void init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_allocs){
+
+    void *current_ptr = align_memory(ptr);
+	*head = (t_meta_chunk *)current_ptr;
+
+    for (size_t i = 0; i < nb_allocs; i++) {
+        current_ptr = align_memory(current_ptr);
+        t_meta_chunk *chunk = (t_meta_chunk*)current_ptr;
+        chunk->free = 1;
+        chunk->size = size;
+
+        if (i < nb_allocs - 1) {
+            void *next_ptr = (char*)current_ptr + sizeof(t_meta_chunk) + size;
+            next_ptr = align_memory(next_ptr);
+            chunk->next = (t_meta_chunk*)next_ptr;
+            current_ptr = next_ptr;
+        } else {
+            chunk->next = NULL;
+        }
+    }
+}
+
+void retard_init(){
+	chunk_base.tiny_chunk_list = NULL;
+	chunk_base.small_chunk_list = NULL;
+}
+
+int init_base(void)
+{
+	if (!chunk_base.initialized)
+	{
+		struct rlimit limit;
+
+		if (getrlimit(RLIMIT_AS, &limit) == 0)
+		{
+			if (limit.rlim_cur == RLIM_INFINITY)
+				chunk_base.limit = (size_t)-1;
+			else
+				chunk_base.limit = limit.rlim_cur;
+		}
+		else 
+			return 0;
+
+		chunk_base.large_chunk_list = NULL;
+		chunk_base.initialized = 1;
+
+		void *ptr_one;
+		void *ptr_two;
+
+		size_t total_chunk_size = (sizeof(t_meta_chunk) + TINY_SIZE) * TINY_ALLOCS;
+		size_t total_size = (total_chunk_size + PAGESIZE -1) & ~(PAGESIZE - 1);
+
+		ft_printf("total_size : %u, limit is : %u\n", total_size, chunk_base.limit * PAGESIZE);
+
+		ptr_one = mmap(NULL, total_size , PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+		if (ptr_one == MAP_FAILED || total_size >= chunk_base.limit){
+			retard_init();
+			ft_printf("mmap failed\n");
+			return 0;
+		}
+		ft_memset(ptr_one, 0, total_size);
+		chunk_base.page_in_use += total_size;
+
+		total_chunk_size = (sizeof(t_meta_chunk) + SMALL_SIZE) * SMALL_ALLOCS;
+		total_size = (total_chunk_size + PAGESIZE -1) & ~(PAGESIZE - 1);
+
+		ft_printf("total_size : %u\n", total_size);
+
+		ptr_two = mmap(NULL, total_size , PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+		if (ptr_two == MAP_FAILED || total_size >= chunk_base.limit){
+			retard_init();
+			ft_printf("mmap failed\n");
+			return 0;
+		}
+		ft_memset(ptr_two, 0, total_size);
+		chunk_base.page_in_use += total_size;
+
+		init_chunks_list(ptr_one, &chunk_base.tiny_chunk_list , TINY_SIZE, TINY_ALLOCS);
+		init_chunks_list(ptr_two, &chunk_base.small_chunk_list ,SMALL_SIZE, SMALL_ALLOCS);
+
+
+	}
+	return 1;
+}
+
+
+
+t_meta_chunk *find_chunck(size_t size){
+	size = ALIGN(size);
+	t_meta_chunk *current;
+
+	if (size < TINY_SIZE)
+		current = chunk_base.tiny_chunk_list;
+	else if (size < SMALL_SIZE)
+		current = chunk_base.small_chunk_list;
+	else
+		return NULL;
+	while (current && !(current->free && current->size >= size)){
+		current = current->next;
+	}
+	if (current){
+		current->free = 0;
+	}
+	return current;
+}
+
 
 t_meta_chunk *add_chunk(size_t size) {
 	size = ALIGN(size);
@@ -66,6 +155,7 @@ t_meta_chunk *add_chunk(size_t size) {
 		ft_printf("mmap failed\n");
 		return NULL;
 	}
+	ft_memset(ptr, 0, total_size);
 
 	//align the ptr correctly
 	void *aligned_ptr = (void*)(((size_t)ptr + sizeof(t_meta_chunk) + (ALIGNMENT -1)) & ~(ALIGNMENT - 1));
@@ -74,20 +164,24 @@ t_meta_chunk *add_chunk(size_t size) {
 	chunk->free = 0;
 	chunk->next = NULL;
 
-	add_back(chunk);
+	add_back(chunk, &(chunk_base.tiny_chunk_list));
 	return (chunk);
 }
 
 void *ft_malloc(size_t size) {
-	if (!init_base())
+	if (!init_base()){
+		ft_printf("hello\n");
 		return NULL;
-	t_meta_chunk *chunk;
+	}
+	t_meta_chunk *chunk = NULL;
 
-	// chunk = (find_chunck(size));
-	chunk = add_chunk(size);
-
+	chunk = find_chunck(size);
+	if (!chunk)
+		chunk = add_chunk(size);
 	if (chunk){
-		return (char *)chunk + sizeof(t_meta_chunk);
+		void *data_ptr = (char*)chunk + sizeof(t_meta_chunk);
+        data_ptr = align_memory(data_ptr);
+        return data_ptr;
 	}
 
 
