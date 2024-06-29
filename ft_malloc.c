@@ -7,8 +7,8 @@
 
 // #define SMALL_ALLOCS 1000
 // #define TINY_ALLOCS 3000
-#define TINY_ALLOCS 20
-#define SMALL_ALLOCS 10
+#define TINY_ALLOCS 200
+#define SMALL_ALLOCS 20
 
 
 #include "libft_malloc.h"
@@ -143,17 +143,17 @@ t_meta_chunk *find_chunck(size_t size){
 	while (current && !(current->free && current->size >= size)){
 		void *data_ptr = (void *)((char *)current + sizeof(t_meta_chunk));
 		data_ptr = align_memory(data_ptr);
-		ft_printf("this chunk at	: %p is free :%d size : %d\n",
-			(char *)data_ptr, 
-			current->free, current->size);	
+		// ft_printf("this chunk at	: %p is free :%d size : %d\n",
+		// 	(char *)data_ptr, 
+		// 	current->free, current->size);	
 		current = current->next;
 	}
 	if (current){
 		void *data_ptr = (void *)((char *)current + sizeof(t_meta_chunk));
 		data_ptr = align_memory(data_ptr);
-		ft_printf("chunk selected	: %p is free :%d size : %d\n\n",
-			(char *)data_ptr,
-			current->free, current->size);
+		// ft_printf("chunk selected	: %p is free :%d size : %d\n\n",
+		// 	(char *)data_ptr,
+		// 	current->free, current->size);
 		current->free = 0;
 	}
 	return current;
@@ -173,9 +173,7 @@ t_meta_chunk *add_chunk(size_t size) {
 	ft_memset(ptr, 0, total_size);
 	chunk_base.mem_in_use += total_size;
 
-	//align the ptr correctly
-	void *aligned_ptr = (void*)(((size_t)ptr + sizeof(t_meta_chunk) + (ALIGNMENT -1)) & ~(ALIGNMENT - 1));
-	t_meta_chunk *chunk = (t_meta_chunk *)aligned_ptr - 1;
+	t_meta_chunk *chunk = (t_meta_chunk *)ptr;
 	chunk->size = total_size;
 	chunk->free = 0;
 	chunk->next = NULL;

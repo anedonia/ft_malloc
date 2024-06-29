@@ -47,7 +47,7 @@ $(STATIC_LIB):
 # Clean up generated files
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET) $(SYMLINK)
-	rm -f test
+	rm -f test mtest gtest vtest main.o
 
 #exec ./test to test ft_malloc
 test: all
@@ -61,7 +61,7 @@ mtest: all
 	ulimit -v 51200; ./$@ $(TARGET)
 	@rm -f main.o $@
 
-ltest: all
+gtest: all
 	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
 	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
 	gdb ./$@ $(TARGET)

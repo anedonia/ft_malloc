@@ -251,12 +251,12 @@ void edge_case_tests(void) {
 }
 
 int main(void) {
-    // int_tests();
-    // free_tests();
+    int_tests();
+    free_tests();
 	reuse_freed_chunks_test();
-	// small_size_alloc_tests();
-	// big_alloc_tests();
-    // edge_case_tests();
+	small_size_alloc_tests();
+	big_alloc_tests();
+    edge_case_tests();
 
     show_alloc_mem();
     return 0;
