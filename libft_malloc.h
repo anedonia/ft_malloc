@@ -37,10 +37,18 @@ typedef struct s_base{
 	struct s_meta_chunk	*large_chunk_list;
 	size_t 				limit;
 	size_t				mem_in_use;
+	size_t				last_defrag;
 	int					initialized;
 } t_base;
 
-void*	align_memory(void* ptr);
+//utils
+void*			align_memory(void* ptr);
+t_meta_chunk	*add_block(t_meta_chunk *last, size_t size);
+t_meta_chunk	*find_chunck(size_t size);
+void			retard_init();
+void			init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_allocs);
+
+//subject
 void	show_alloc_mem();
 void	free(void *ptr);
 void	*malloc(size_t size);

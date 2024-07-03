@@ -231,6 +231,7 @@ void edge_case_tests(void) {
     void *ptrs[100];
     for (int i = 0; i < 100; i++) {
         ptrs[i] = malloc(sizeof(int));
+        // ptrs[i] = malloc(100);
         if (!ptrs[i]) {
             printf(RED "FAIL" RESET ": Allocation failed at iteration %d\n\n", i);
             return;

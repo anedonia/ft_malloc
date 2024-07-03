@@ -7,8 +7,8 @@
 
 // #define SMALL_ALLOCS 1000
 // #define TINY_ALLOCS 3000
-#define TINY_ALLOCS 150
-#define SMALL_ALLOCS 150
+#define TINY_ALLOCS 10
+#define SMALL_ALLOCS 10
 
 
 #include "libft_malloc.h"
@@ -38,6 +38,7 @@ void* align_memory(void* ptr) {
 
 void init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_allocs){
 
+	// ft_printf("list is initialized\n");
     void *current_ptr = align_memory(ptr);
 	*head = (t_meta_chunk *)current_ptr;
 
@@ -58,10 +59,6 @@ void init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_al
     }
 }
 
-// void *add_block(){
-
-// }
-
 void retard_init(){
 	chunk_base.tiny_chunk_list = NULL;
 	chunk_base.small_chunk_list = NULL;
@@ -75,10 +72,15 @@ int init_base(void)
 
 		if (getrlimit(RLIMIT_AS, &limit) == 0)
 		{
-			if (limit.rlim_cur == RLIM_INFINITY)
+			if (limit.rlim_cur == RLIM_INFINITY){
+
 				chunk_base.limit = (size_t)-1;
-			else
+				ft_printf("limit is inf : %lld\n", chunk_base.limit);
+			}
+			else {
 				chunk_base.limit = limit.rlim_cur;
+				ft_printf("limit is : %lld\n", chunk_base.limit);
+			}
 		}
 		else 
 			return 0;
@@ -130,7 +132,9 @@ int init_base(void)
 t_meta_chunk *find_chunck(size_t size){
 	size = ALIGN(size);
 	t_meta_chunk *current;
+	t_meta_chunk *prev;
 
+	prev = NULL;
 	if (size < TINY_SIZE)
 		current = chunk_base.tiny_chunk_list;
 	else if (size < SMALL_SIZE)
@@ -143,6 +147,7 @@ t_meta_chunk *find_chunck(size_t size){
 		// ft_printf("this chunk at	: %p is free :%d size : %d\n",
 		// 	(char *)data_ptr, 
 		// 	current->free, current->size);	
+		prev = current;
 		current = current->next;
 	}
 	if (current){
@@ -152,6 +157,9 @@ t_meta_chunk *find_chunck(size_t size){
 		// 	(char *)data_ptr,
 		// 	current->free, current->size);
 		current->free = 0;
+	}
+	else if (prev && size < 1024){
+		current = add_block(prev, prev->size);
 	}
 	return current;
 }

@@ -58,7 +58,7 @@ test: all
 mtest: all
 	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
 	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
-	ulimit -v 51200; ./$@ $(TARGET)
+	ulimit -v 51200; ./$@ $(TARGET) # ca represente 5 000 000 bytes
 	@rm -f main.o $@
 
 gtest: all
@@ -70,7 +70,7 @@ gtest: all
 vtest: all
 	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
 	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
-	valgrind -s ./$@ $(TARGET)
+	valgrind -s --leak-check=full ./$@ $(TARGET)
 	@rm -f main.o $@
 
 # Clean up all generated files, including the static library
