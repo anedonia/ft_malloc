@@ -4,7 +4,7 @@
 extern t_base chunk_base;
 
 
-void ft_free(void *ptr){
+void free(void *ptr){
     if (!ptr) {
         return;
     }

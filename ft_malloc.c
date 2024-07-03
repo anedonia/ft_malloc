@@ -7,8 +7,8 @@
 
 // #define SMALL_ALLOCS 1000
 // #define TINY_ALLOCS 3000
-#define TINY_ALLOCS 200
-#define SMALL_ALLOCS 20
+#define TINY_ALLOCS 150
+#define SMALL_ALLOCS 150
 
 
 #include "libft_malloc.h"
@@ -18,10 +18,7 @@ t_base chunk_base;
 void add_back(t_meta_chunk *new, t_meta_chunk **head)
 {
 	if (*head == NULL)
-	{
-		ft_printf("new head\n");
 		*head = new;
-	}
 	else
 	{
 		t_meta_chunk *current = *head;
@@ -177,16 +174,14 @@ t_meta_chunk *add_chunk(size_t size) {
 	chunk->size = total_size;
 	chunk->free = 0;
 	chunk->next = NULL;
-
+	// ft_printf("Large chunk is added\n");
 	add_back(chunk, &(chunk_base.large_chunk_list));
 	return (chunk);
 }
 
-void *ft_malloc(size_t size) {
-	if (!init_base() || size == 0){
-		ft_printf("init error or size 0\n");
+void *malloc(size_t size) {
+	if (!init_base() || size == 0)
 		return NULL;
-	}
 	t_meta_chunk *chunk = NULL;
 
 	chunk = find_chunck(size);

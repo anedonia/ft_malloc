@@ -7,13 +7,13 @@
 #define RESET "\033[0m"
 
 void int_tests(void) {
-    int *ptr_1 = ft_malloc(sizeof(int));
-    int *ptr_2 = ft_malloc(sizeof(int));
-    int *ptr_3 = ft_malloc(sizeof(int));
-    int *ptr_4 = ft_malloc(sizeof(int));
+    int *ptr_1 = malloc(sizeof(int));
+    int *ptr_2 = malloc(sizeof(int));
+    int *ptr_3 = malloc(sizeof(int));
+    int *ptr_4 = malloc(sizeof(int));
 
     if (!ptr_1 || !ptr_2 || !ptr_3 || !ptr_4) {
-        printf("ft_malloc failed\n");
+        printf("malloc failed\n");
         return;
     }
 
@@ -55,13 +55,13 @@ void int_tests(void) {
 }
 
 void free_tests(void) {
-    int *ptr_1 = ft_malloc(sizeof(int));
-    int *ptr_2 = ft_malloc(sizeof(int));
-    int *ptr_3 = ft_malloc(sizeof(int));
-    int *ptr_4 = ft_malloc(sizeof(int));
+    int *ptr_1 = malloc(sizeof(int));
+    int *ptr_2 = malloc(sizeof(int));
+    int *ptr_3 = malloc(sizeof(int));
+    int *ptr_4 = malloc(sizeof(int));
 
     if (!ptr_1 || !ptr_2 || !ptr_3 || !ptr_4) {
-        printf("ft_malloc failed\n");
+        printf("malloc failed\n");
         return;
     }
 
@@ -70,14 +70,14 @@ void free_tests(void) {
     *ptr_3 = 56;
     *ptr_4 = 78;
 
-    ft_free(ptr_2);
-    ft_free(ptr_4);
+    free(ptr_2);
+    free(ptr_4);
 
-    int *ptr_5 = ft_malloc(sizeof(int));
-    int *ptr_6 = ft_malloc(sizeof(int));
+    int *ptr_5 = malloc(sizeof(int));
+    int *ptr_6 = malloc(sizeof(int));
 
     if (!ptr_5 || !ptr_6) {
-        printf("ft_malloc failed\n");
+        printf("malloc failed\n");
         return;
     }
 
@@ -115,20 +115,20 @@ void free_tests(void) {
 
 void reuse_freed_chunks_test(void) {
     // Allocate some memory chunks
-    int *ptr_1 = ft_malloc(sizeof(int));
-    int *ptr_2 = ft_malloc(sizeof(int));
-    int *ptr_3 = ft_malloc(sizeof(int));
+    int *ptr_1 = malloc(sizeof(int));
+    int *ptr_2 = malloc(sizeof(int));
+    int *ptr_3 = malloc(sizeof(int));
 
     if (!ptr_1 || !ptr_2 || !ptr_3) {
-        printf("ft_malloc failed\n");
+        printf("malloc failed\n");
         return;
     }
 
     // Free the second chunk
-    ft_free(ptr_2);
+    free(ptr_2);
 
     // Allocate a new chunk
-    int *ptr_4 = ft_malloc(sizeof(int));
+    int *ptr_4 = malloc(sizeof(int));
 
     printf("--------------------------------------------------------------------\n");
     printf("Checking if freed memory is reused correctly:\n");
@@ -153,7 +153,7 @@ void small_size_alloc_tests(void) {
 
     // Allocate multiple small chunks of memory
     for (size_t i = 0; i < num_allocs; i++) {
-        pointers[i] = ft_malloc(alloc_sizes[i % 5]);  // Use different sizes from the array
+        pointers[i] = malloc(alloc_sizes[i % 5]);  // Use different sizes from the array
         if (!pointers[i]) {
             printf(RED "FAIL" RESET ": Allocation %zu failed\n", i);
             return;
@@ -191,13 +191,13 @@ void small_size_alloc_tests(void) {
 
     // Free the allocated memory
     for (size_t i = 0; i < num_allocs; i++) {
-        ft_free(pointers[i]);
+        free(pointers[i]);
     }
 }
 
 void big_alloc_tests(void) {
     size_t big_size = 10 * 1024 * 1024; // 10 MB
-    void *big_ptr = ft_malloc(big_size);
+    void *big_ptr = malloc(big_size);
 
     if (!big_ptr) {
         printf("Big allocation failed\n");
@@ -215,11 +215,11 @@ void big_alloc_tests(void) {
     // Optionally fill the allocated memory to check for access errors
     memset(big_ptr, 0, big_size);
 
-    ft_free(big_ptr);
+    free(big_ptr);
 }
 
 void edge_case_tests(void) {
-    void *zero_alloc = ft_malloc(0);
+    void *zero_alloc = malloc(0);
     printf("Checking zero-sized allocation:\n");
     if (zero_alloc) {
         printf(RED "FAIL" RESET ": Zero-sized allocation should return NULL\n\n");
@@ -230,24 +230,133 @@ void edge_case_tests(void) {
     // Allocate and free multiple times to check for stability
     void *ptrs[100];
     for (int i = 0; i < 100; i++) {
-        ptrs[i] = ft_malloc(sizeof(int));
+        ptrs[i] = malloc(sizeof(int));
         if (!ptrs[i]) {
             printf(RED "FAIL" RESET ": Allocation failed at iteration %d\n\n", i);
             return;
         }
-        ft_free(ptrs[i]);
+        free(ptrs[i]);
     }
     printf(GREEN "PASS" RESET ": Multiple allocations and frees succeeded\n\n");
 
     // Check for address reuse after multiple allocations and frees
-    void *first_alloc = ft_malloc(sizeof(int));
-    ft_free(first_alloc);
-    void *second_alloc = ft_malloc(sizeof(int));
+    void *first_alloc = malloc(sizeof(int));
+    free(first_alloc);
+    void *second_alloc = malloc(sizeof(int));
     if (first_alloc == second_alloc) {
         printf(GREEN "PASS" RESET ": Address reused correctly after free\n\n");
     } else {
         printf(RED "FAIL" RESET ": Address not reused after free\n\n");
     }
+}
+
+void realloc_tests(void) {
+    printf("Starting realloc tests...\n");
+
+    // Test realloc with NULL pointer (should behave like malloc)
+    printf("Test 1: realloc with NULL pointer\n");
+    int *ptr_1 = realloc(NULL, sizeof(int) * 4);
+    if (ptr_1 == NULL) {
+        printf(RED "FAIL" RESET ": realloc with NULL pointer returned NULL\n");
+    } else {
+        printf(GREEN "PASS" RESET ": realloc with NULL pointer allocated memory\n");
+    }
+    free(ptr_1);
+
+    // Test realloc to a larger size
+    printf("Test 2: realloc to a larger size\n");
+    int *ptr_2 = malloc(sizeof(int) * 4);
+    for (int i = 0; i < 4; i++) {
+        ptr_2[i] = i;
+    }
+    int *ptr_3 = realloc(ptr_2, 400);
+    if (ptr_3 == NULL) {
+        printf(RED "FAIL" RESET ": realloc to a larger size returned NULL\n");
+    } else {
+        int success = 1;
+        for (int i = 0; i < 4; i++) {
+            if (ptr_3[i] != i) {
+                success = 0;
+                break;
+            }
+        }
+        if (success) {
+            printf(GREEN "PASS" RESET ": realloc to a larger size preserved data\n");
+        } else {
+            printf(RED "FAIL" RESET ": realloc to a larger size did not preserve data\n");
+        }
+    }
+    free(ptr_3);
+
+    // Test realloc to a smaller size
+    printf("Test 3: realloc to a smaller size\n");
+    int *ptr_4 = malloc(sizeof(int) * 8);
+    for (int i = 0; i < 8; i++) {
+        ptr_4[i] = i;
+    }
+    int *ptr_5 = realloc(ptr_4, sizeof(int) * 4);
+    if (ptr_5 == NULL) {
+        printf(RED "FAIL" RESET ": realloc to a smaller size returned NULL\n");
+    } else {
+        int success = 1;
+        for (int i = 0; i < 4; i++) {
+            if (ptr_5[i] != i) {
+                success = 0;
+                break;
+            }
+        }
+        if (success) {
+            printf(GREEN "PASS" RESET ": realloc to a smaller size preserved data\n");
+        } else {
+            printf(RED "FAIL" RESET ": realloc to a smaller size did not preserve data\n");
+        }
+    }
+    free(ptr_5);
+
+    // Test realloc with size of zero (should behave like free)
+    printf("Test 4: realloc with size of zero\n");
+    int *ptr_6 = malloc(sizeof(int) * 4);
+    int *ptr_7 = realloc(ptr_6, 0);
+    if (ptr_7 != NULL) {
+        printf(RED "FAIL" RESET ": realloc with size of zero did not return NULL\n");
+    } else {
+        printf(GREEN "PASS" RESET ": realloc with size of zero returned NULL\n");
+    }
+	  // Test realloc with string data preservation
+    printf("Test 6: realloc with string data preservation\n");
+    char *str_1 = malloc(6);
+    strcpy(str_1, "Hello");
+    printf("Original string: %s\n", str_1);
+
+    // Increase size
+    char *str_2 = realloc(str_1, 2000);
+    if (str_2 == NULL) {
+        printf(RED "FAIL" RESET ": realloc for string data preservation returned NULL\n");
+    } else {
+        strcpy(str_2 + 5, " World");
+        printf("New string after realloc and append: %s\n", str_2);
+        if (strcmp(str_2, "Hello World") == 0) {
+            printf(GREEN "PASS" RESET ": realloc preserved string data correctly when increasing size\n");
+        } else {
+            printf(RED "FAIL" RESET ": realloc did not preserve string data correctly when increasing size\n");
+        }
+    }
+
+    // Reduce size
+    char *str_3 = realloc(str_2, 6);
+    if (str_3 == NULL) {
+        printf(RED "FAIL" RESET ": realloc for reducing string data returned NULL\n");
+    } else {
+        printf("String after reducing size: %s\n", str_3);
+        if (strncmp(str_3, "Hello", 5) == 0) {
+            printf(GREEN "PASS" RESET ": realloc preserved string data correctly when reducing size\n");
+        } else {
+            printf(RED "FAIL" RESET ": realloc did not preserve string data correctly when reducing size\n");
+        }
+    }
+    free(str_3);
+
+    printf("Realloc tests completed.\n");
 }
 
 int main(void) {
@@ -257,6 +366,7 @@ int main(void) {
 	small_size_alloc_tests();
 	big_alloc_tests();
     edge_case_tests();
+	realloc_tests();
 
     show_alloc_mem();
     return 0;

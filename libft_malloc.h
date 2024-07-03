@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
-#include <stdlib.h>
+// #include <stdlib.h>
 #include <stdint.h>
 
 #ifdef __linux__
@@ -42,9 +42,9 @@ typedef struct s_base{
 
 void*	align_memory(void* ptr);
 void	show_alloc_mem();
-void	ft_free(void *ptr);
-void	*ft_malloc(size_t size);
-void	*ft_realloc(void *prt, size_t size);
+void	free(void *ptr);
+void	*malloc(size_t size);
+void	*realloc(void *prt, size_t size);
 
 
 #endif
