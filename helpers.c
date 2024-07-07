@@ -7,7 +7,7 @@ t_meta_chunk *add_block(t_meta_chunk *last, size_t size)
 
 	t_meta_chunk *chunk;
 
-	size_t total_chunk_size = (sizeof(t_meta_chunk) + size) * STANDARD_BLOCK;
+	size_t total_chunk_size =  size * STANDARD_BLOCK;
 	size_t total_size = (total_chunk_size + PAGESIZE - 1) & ~(PAGESIZE - 1);
 
 	// ft_printf("total_size : %u, limit is : %u\n", total_size, chunk_base.limit * PAGESIZE);
@@ -22,8 +22,19 @@ t_meta_chunk *add_block(t_meta_chunk *last, size_t size)
 	ft_memset(ptr_one, 0, total_size);
 	chunk_base.mem_in_use += total_size;
 
-	init_chunks_list(ptr_one, &last->next, size, STANDARD_BLOCK);
-	chunk = find_chunck(size);
-	// ft_printf("a block was added\n");
+	if (!last)
+	{
+		if (size == 64){
+			init_chunks_list(ptr_one, &chunk_base.tiny_chunk_list, TINY_SIZE, STANDARD_BLOCK);
+			ft_printf("block changement de tete\n", size);
+		}
+		else{
+			ft_printf("block changement de tete\n", size);
+			init_chunks_list(ptr_one, &chunk_base.small_chunk_list, SMALL_SIZE, STANDARD_BLOCK);
+		} 
+	}
+	else 
+		init_chunks_list(ptr_one, &last->next, size, STANDARD_BLOCK);
+	chunk = find_chunck(size - 32);
 	return chunk;
 }

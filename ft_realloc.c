@@ -15,7 +15,6 @@ void *realloc(void* ptr, size_t size){
     if (addr % ALIGNMENT != 0) {
         addr -= ALIGNMENT - (addr % ALIGNMENT);
     }
-	// printf("addr : %lX\n", addr);
 
     t_meta_chunk *chunk = (t_meta_chunk *)addr;
 	if (chunk->size > size){

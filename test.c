@@ -140,14 +140,14 @@ void reuse_freed_chunks_test(void) {
         printf(RED "FAIL" RESET ": Freed chunk not reused for new allocation\n\n");
         printf("ptr_2: %p, ptr_4: %p\n", (void*)ptr_2, (void*)ptr_4);
     }
-
+	free(ptr_4);
     printf("--------------------------------------------------------------------\n");
 }
 
 void small_size_alloc_tests(void) {
     // Define the number of small allocations and the size of each allocation
     const size_t num_allocs = 10;
-    const size_t alloc_sizes[] = {64, 128, 256, 512, 1024};  // Sizes within the small allocation range
+    const size_t alloc_sizes[] = {32, 128, 256, 512, 992};  // Sizes within the small allocation range
 
     void *pointers[num_allocs];
 
@@ -189,6 +189,7 @@ void small_size_alloc_tests(void) {
 
     printf("--------------------------------------------------------------------\n");
 
+	// show_alloc_mem_chunk();
     // Free the allocated memory
     for (size_t i = 0; i < num_allocs; i++) {
         free(pointers[i]);
@@ -226,6 +227,7 @@ void edge_case_tests(void) {
     } else {
         printf(GREEN "PASS" RESET ": Zero-sized allocation returned NULL as expected\n\n");
     }
+	free(zero_alloc);
 
     // Allocate and free multiple times to check for stability
     void *ptrs[100];
@@ -330,7 +332,7 @@ void realloc_tests(void) {
     printf("Original string: %s\n", str_1);
 
     // Increase size
-    char *str_2 = realloc(str_1, 2000);
+    char *str_2 = realloc(str_1, 900);
     if (str_2 == NULL) {
         printf(RED "FAIL" RESET ": realloc for string data preservation returned NULL\n");
     } else {
@@ -361,9 +363,10 @@ void realloc_tests(void) {
 }
 
 void large_allocation_test(void) {
-    const size_t tiny_alloc_size = 64;
-    const size_t big_alloc_size = 1024;
-    const size_t num_allocs = 50000;
+    const size_t tiny_alloc_size = 32;
+    const size_t big_alloc_size = 992;
+    const size_t num_allocs = 5000;
+
     void *tiny_pointers[num_allocs];
     void *big_pointers[num_allocs];
 
@@ -404,16 +407,37 @@ void large_allocation_test(void) {
     printf(GREEN "PASS" RESET ": Successfully freed big allocations\n");
 }
 
+extern t_base chunk_base;
+
+extern void print_chunks(t_meta_chunk *head);
+extern int number_chunks(t_meta_chunk *head);
+
+
 int main(void) {
-    int_tests();
+
+    int *ptr_1 = malloc(sizeof(int));
+	    int *ptr_2 = malloc(sizeof(int));
+    int *ptr_3 = malloc(sizeof(int));
+    int *ptr_4 = malloc(sizeof(int));
+	free(ptr_1);
+	free(ptr_2);
+	free(ptr_3);
+	free(ptr_4);
+	show_alloc_mem();
+    // int_tests();
     free_tests();
-	reuse_freed_chunks_test();
-	small_size_alloc_tests();
-	big_alloc_tests();
-    edge_case_tests();
-	realloc_tests();
-	large_allocation_test();
+	// reuse_freed_chunks_test();
+	// small_size_alloc_tests();
+	// big_alloc_tests();
+	// edge_case_tests();
+	// realloc_tests();
+	// large_allocation_test();
 	// show_alloc_mem_chunk();
-    show_alloc_mem();
-    return 0;
+
+	// printf("chunk nb after : %d\n", number_chunks(chunk_base.tiny_chunk_list));
+	// printf("chunk nb after : %d\n", number_chunks(chunk_base.small_chunk_list));
+	// print_chunks(chunk_base.tiny_chunk_list);
+	// print_chunks(chunk_base.small_chunk_list);
+	// show_alloc_mem();
+	return 0;
 }

@@ -19,12 +19,12 @@
 #error "Unsupported operating system"
 #endif
 
-#define STANDARD_BLOCK 10
+#define STANDARD_BLOCK 100
 #define TINY_ALLOCS 10
 #define SMALL_ALLOCS 10
+
 #define TINY_SIZE 64
 #define SMALL_SIZE 1024
-#define LARGE_THRESHOLD (1024 * 1024 * 10) // 10MB
 #define ALIGNMENT 16
 #define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 
@@ -43,8 +43,9 @@ typedef struct s_base{
 	struct s_meta_chunk	*large_chunk_list;
 	size_t 				limit;
 	size_t				mem_in_use;
-	size_t				last_defrag;
+	size_t				large_threshold;
 	int					initialized;
+
 } t_base;
 
 //utils
@@ -55,6 +56,7 @@ void			retard_init();
 void			init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_allocs);
 void			show_alloc_mem_chunk();
 int				init_base(void);
+void			defrag_mem(t_meta_chunk **head);
 
 //subject
 void	show_alloc_mem();

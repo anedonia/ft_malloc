@@ -24,54 +24,98 @@ void remove_chunk(t_meta_chunk **head, t_meta_chunk *chunk){
 	}
 }
 
-// void remove_and_free_nodes(t_meta_chunk **head) {
-//     t_meta_chunk *current = *head;
-//     t_meta_chunk *prev = NULL;
-// 	printf("current size : %ld\n", current->size);
-//     while (current != NULL) {
-//         if (current->free) {
-//             t_meta_chunk *to_free = current;
-//             if (prev == NULL) {
-//                 *head = current->next;
-//             } else {
-//                 prev->next = current->next;
-//             }
-//             current = current->next;
-//             if (munmap(to_free, 96) != 0) {
-//                 ft_printf("munmap failed\n");
-//                 return;
-//             }
-//         } else {
-//             prev = current;
-//             current = current->next;
-//         }
-//     }
-// }
+int remove_block(t_meta_chunk **head, t_meta_chunk *to_remove, size_t nbpage)
+{
+	int res = 1;
+	t_meta_chunk *swap_chunk = (t_meta_chunk *)((char *)to_remove + (nbpage * PAGESIZE));
+	t_meta_chunk *end_test = (t_meta_chunk *)((char *)to_remove + (nbpage * PAGESIZE)- (to_remove->size + 32));
 
-// void defrag_mem(t_meta_chunk **head){
-//     t_meta_chunk *current = *head;
 
-//     while (current) {
-// 		t_meta_chunk *remove = current;
-// 		current = current->next;
-//         ft_printf("current is at: %p, next is: %p, size is: %d\n", current, current->next, current->size);
-//         if (remove->free) {
-//             chunk_base.mem_in_use -= remove->size;
-//             remove_chunk(head, remove);
-//             ft_printf("Removing chunk at: %p, next is: %p, size is: %d\n", remove, current, current->size);
-//             // if (munmap(remove, 1) != 0){
-// 			// 	return;
-// 			// }
-//         }
-//     }
-// }
+	if (*head == NULL || to_remove == NULL)
+		return res;
+	if (!end_test->next)
+	{
+		res = 0;
+	}
+	else if (to_remove == *head)
+	{
+		ft_printf("head swap\n");
+		*head = swap_chunk;
+	}
+	else
+	{
+		ft_printf("\n\nno head change\n");
+		t_meta_chunk *prev = *head;
+		t_meta_chunk *temp_l = (*head)->next;
+		while (temp_l != NULL && temp_l != to_remove)
+		{
+			prev = temp_l;
+			temp_l = temp_l->next;
+		}
+		if (!temp_l)
+			return res;
+		prev->next = swap_chunk;
+	}
+	
+	ft_printf("freeing one page\n");
+	if (munmap(to_remove, nbpage * PAGESIZE) != 0)
+	{
+		ft_printf("munmap failed in block removing\n");
+		return res;
+	}
+	chunk_base.mem_in_use -= nbpage * PAGESIZE;
+	return res; 
+}
+
+void defrag_mem(t_meta_chunk **head){
+    t_meta_chunk *current = *head;
+    t_meta_chunk *temp;
+	size_t data_size = (*head)->size + 32;
+	int i;
+
+    while (current != NULL && current->next != NULL) {
+        if ((uintptr_t)current % PAGESIZE == 0 && current->free) {
+			temp = current;
+			i = 0;
+            while (current != NULL && current->free) {
+                i++;
+                current = current->next;
+
+				if (i * data_size / PAGESIZE == 1){
+					if (!remove_block(head, temp, 1))
+						return;
+					break;
+				}
+				if (i * (data_size) / PAGESIZE > 1)
+					break;
+            }
+			// size_t nb_bytes = i * (temp->size + 32);
+			// size_t nb_pages = nb_bytes / PAGESIZE;
+			// printf("nb de pages a free : %ld in %d chunks\n", nb_pages, i);
+		}
+		else
+			current = current->next;
+	}
+}
 
 void print_chunks(t_meta_chunk *head) {
     t_meta_chunk *current = head;
+	int i = 0;
     while (current) {
-        printf("Chunk at: %p, size: %zu, free: %d, next: %p\n", (void *)current, current->size, current->free, (void *)current->next);
+		i++;
         current = current->next;
     }
+    printf("total : %d\n", i);
+}
+
+int number_chunks(t_meta_chunk *head) {
+    t_meta_chunk *current = head;
+	int i = 0;
+    while (current) {
+		i++;
+        current = current->next;
+    }
+	return (i);
 }
 
 void free(void *ptr){
@@ -92,26 +136,30 @@ void free(void *ptr){
     // printf("Chunk next pointer: %p\n", (void*)chunk->next);
 
     chunk->free = 1;
-	if (chunk->size > 1024)
+	if (chunk->size > 1000)
 	{
+
 		chunk_base.mem_in_use -= chunk->size;
 		remove_chunk(&chunk_base.large_chunk_list, chunk);
 		if (munmap(chunk, chunk->size) != 0)
 			return;
 	}
-	// // if (LARGE_THRESHOLD > chunk_base.mem_in_use)
-	// if (1)
-	// {
-	// 	printf("Before defragmentation:\n");
-	// 	print_chunks(chunk_base.tiny_chunk_list);
-	// 	print_chunks(chunk_base.small_chunk_list);
-	// 	remove_and_free_nodes(&chunk_base.tiny_chunk_list);
+	// if (number_chunks(chunk_base.tiny_chunk_list) > 50)
+	if (chunk_base.large_threshold < chunk_base.mem_in_use)
+	{
+		// printf("chunk nb before : %d\n",number_chunks(chunk_base.tiny_chunk_list));
+		// printf("chunk nb before : %d\n",number_chunks(chunk_base.small_chunk_list));
+		// print_chunks(chunk_base.tiny_chunk_list);
+		// print_chunks(chunk_base.small_chunk_list);
+		if (chunk_base.tiny_chunk_list)
+			defrag_mem(&chunk_base.tiny_chunk_list);
+		if (chunk_base.small_chunk_list)
+			defrag_mem(&chunk_base.small_chunk_list);
+		// chunk_base.large_threshold *= 1.1;
 
-	// 	remove_and_free_nodes(&chunk_base.small_chunk_list);
-	// 	printf("After defragmentation:\n");
-	// 	print_chunks(chunk_base.tiny_chunk_list);
-	// 	print_chunks(chunk_base.small_chunk_list);
-	// 	// defrag_mem(&chunk_base.tiny_chunk_list);
-	// 	// defrag_mem(&chunk_base.small_chunk_list);
-	// }
+		// printf("chunk nb after : %d\n",number_chunks(chunk_base.tiny_chunk_list));
+		// printf("chunk nb after : %d\n",number_chunks(chunk_base.small_chunk_list));
+		// print_chunks(chunk_base.tiny_chunk_list);
+		// print_chunks(chunk_base.small_chunk_list);
+	}
 }
