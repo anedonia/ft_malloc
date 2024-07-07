@@ -3,6 +3,7 @@
 extern void *malloc(size_t size);
 
 void *realloc(void* ptr, size_t size){
+	init_base();
 	if (!ptr)
 		return NULL;
 	if (size == 0){

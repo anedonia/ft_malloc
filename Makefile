@@ -47,31 +47,31 @@ $(STATIC_LIB):
 # Clean up generated files
 clean:
 	rm -rf $(OBJ_DIR) $(TARGET) $(SYMLINK)
-	rm -f test mtest gtest vtest main.o
+	rm -f test mtest gtest vtest test.o
 
 #exec ./test to test ft_malloc
 test: all
-	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
-	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
+	@$(CC) -Wall -Werror -Wextra -g3 -c test.c
+	@$(CC) -Wall -Werror -Wextra -g3 test.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
 	./test $(TARGET)
 
 mtest: all
-	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
-	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
+	@$(CC) -Wall -Werror -Wextra -g3 -c test.c
+	@$(CC) -Wall -Werror -Wextra -g3 test.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
 	ulimit -v 51200; ./$@ $(TARGET) # ca represente 5 000 000 bytes
-	@rm -f main.o $@
+	@rm -f test.o $@
 
 gtest: all
-	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
-	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
+	@$(CC) -Wall -Werror -Wextra -g3 -c test.c
+	@$(CC) -Wall -Werror -Wextra -g3 test.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
 	gdb ./$@ $(TARGET)
-	@rm -f main.o $@
+	@rm -f test.o $@
 
 vtest: all
-	@$(CC) -Wall -Werror -Wextra -g3 -c main.c
-	@$(CC) -Wall -Werror -Wextra -g3 main.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
+	@$(CC) -Wall -Werror -Wextra -g3 -c test.c
+	@$(CC) -Wall -Werror -Wextra -g3 test.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
 	valgrind -s --leak-check=full ./$@ $(TARGET)
-	@rm -f main.o $@
+	@rm -f test.o $@
 
 # Clean up all generated files, including the static library
 fclean: clean

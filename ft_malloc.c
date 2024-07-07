@@ -1,16 +1,3 @@
-#define TINY_SIZE 64
-#define SMALL_SIZE 1024
-
-// #define TINY_SIZE 100000000000
-// #define SMALL_SIZE 1024
-
-
-// #define SMALL_ALLOCS 1000
-// #define TINY_ALLOCS 3000
-#define TINY_ALLOCS 10
-#define SMALL_ALLOCS 10
-
-
 #include "libft_malloc.h"
 
 t_base chunk_base;
@@ -60,6 +47,7 @@ void init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_al
 }
 
 void retard_init(){
+	ft_printf("backup list used\n");
 	chunk_base.tiny_chunk_list = NULL;
 	chunk_base.small_chunk_list = NULL;
 }
@@ -75,7 +63,7 @@ int init_base(void)
 			if (limit.rlim_cur == RLIM_INFINITY){
 
 				chunk_base.limit = (size_t)-1;
-				ft_printf("limit is inf : %lld\n", chunk_base.limit);
+				ft_printf("limit is inf : %d\n", chunk_base.limit);
 			}
 			else {
 				chunk_base.limit = limit.rlim_cur;
@@ -94,7 +82,7 @@ int init_base(void)
 		size_t total_chunk_size = (sizeof(t_meta_chunk) + TINY_SIZE) * TINY_ALLOCS;
 		size_t total_size = (total_chunk_size + PAGESIZE -1) & ~(PAGESIZE - 1);
 
-		ft_printf("total_size : %u, limit is : %u\n", total_size, chunk_base.limit * PAGESIZE);
+		// ft_printf("total_size : %u, limit is : %u\n", total_size, chunk_base.limit * PAGESIZE);
 
 		ptr_one = mmap(NULL, total_size , PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 		if (ptr_one == MAP_FAILED || total_size >= chunk_base.limit){
@@ -108,7 +96,7 @@ int init_base(void)
 		total_chunk_size = (sizeof(t_meta_chunk) + SMALL_SIZE) * SMALL_ALLOCS;
 		total_size = (total_chunk_size + PAGESIZE -1) & ~(PAGESIZE - 1);
 
-		ft_printf("total_size : %u\n", total_size);
+		// ft_printf("total_size : %u\n", total_size);
 
 		ptr_two = mmap(NULL, total_size , PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 		if (ptr_two == MAP_FAILED || total_size >= chunk_base.limit){
@@ -135,9 +123,9 @@ t_meta_chunk *find_chunck(size_t size){
 	t_meta_chunk *prev;
 
 	prev = NULL;
-	if (size < TINY_SIZE)
+	if (size <= TINY_SIZE)
 		current = chunk_base.tiny_chunk_list;
-	else if (size < SMALL_SIZE)
+	else if (size <= SMALL_SIZE)
 		current = chunk_base.small_chunk_list;
 	else
 		current = chunk_base.large_chunk_list;
@@ -158,7 +146,7 @@ t_meta_chunk *find_chunck(size_t size){
 		// 	current->free, current->size);
 		current->free = 0;
 	}
-	else if (prev && size < 1024){
+	else if (prev && size <= 1024){
 		current = add_block(prev, prev->size);
 	}
 	return current;
@@ -182,7 +170,7 @@ t_meta_chunk *add_chunk(size_t size) {
 	chunk->size = total_size;
 	chunk->free = 0;
 	chunk->next = NULL;
-	// ft_printf("Large chunk is added\n");
+	ft_printf("Large chunk is added\n");
 	add_back(chunk, &(chunk_base.large_chunk_list));
 	return (chunk);
 }

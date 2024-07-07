@@ -19,6 +19,12 @@
 #error "Unsupported operating system"
 #endif
 
+#define STANDARD_BLOCK 10
+#define TINY_ALLOCS 10
+#define SMALL_ALLOCS 10
+#define TINY_SIZE 64
+#define SMALL_SIZE 1024
+#define LARGE_THRESHOLD (1024 * 1024 * 10) // 10MB
 #define ALIGNMENT 16
 #define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
 
@@ -47,6 +53,8 @@ t_meta_chunk	*add_block(t_meta_chunk *last, size_t size);
 t_meta_chunk	*find_chunck(size_t size);
 void			retard_init();
 void			init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_allocs);
+void			show_alloc_mem_chunk();
+int				init_base(void);
 
 //subject
 void	show_alloc_mem();

@@ -360,6 +360,50 @@ void realloc_tests(void) {
     printf("Realloc tests completed.\n");
 }
 
+void large_allocation_test(void) {
+    const size_t tiny_alloc_size = 64;
+    const size_t big_alloc_size = 1024;
+    const size_t num_allocs = 50000;
+    void *tiny_pointers[num_allocs];
+    void *big_pointers[num_allocs];
+
+    // Test tiny allocations
+    printf("Testing endurance tiny allocations...\n");
+    for (size_t i = 0; i < num_allocs; i++) {
+        tiny_pointers[i] = malloc(tiny_alloc_size);
+        if (!tiny_pointers[i]) {
+            printf(RED "FAIL" RESET ": Tiny allocation %zu failed\n", i);
+            return;
+        }
+    }
+    printf(GREEN "PASS" RESET ": Successfully allocated endurance tiny allocations\n");
+
+    // Test big allocations
+    printf("Testing endurance  big allocations...\n");
+    for (size_t i = 0; i < num_allocs; i++) {
+        big_pointers[i] = malloc(big_alloc_size);
+        if (!big_pointers[i]) {
+            printf(RED "FAIL" RESET ": Big allocation %zu failed\n", i);
+            return;
+        }
+    }
+    printf(GREEN "PASS" RESET ": Successfully allocated endurance  big allocations\n");
+
+    // Free tiny allocations
+    printf("Freeing tiny allocations...\n");
+    for (size_t i = 0; i < num_allocs; i++) {
+        free(tiny_pointers[i]);
+    }
+    printf(GREEN "PASS" RESET ": Successfully freed tiny allocations\n");
+
+    // Free big allocations
+    printf("Freeing big allocations...\n");
+    for (size_t i = 0; i < num_allocs; i++) {
+        free(big_pointers[i]);
+    }
+    printf(GREEN "PASS" RESET ": Successfully freed big allocations\n");
+}
+
 int main(void) {
     int_tests();
     free_tests();
@@ -368,7 +412,8 @@ int main(void) {
 	big_alloc_tests();
     edge_case_tests();
 	realloc_tests();
-
+	large_allocation_test();
+	// show_alloc_mem_chunk();
     show_alloc_mem();
     return 0;
 }
