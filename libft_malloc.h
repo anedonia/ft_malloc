@@ -20,8 +20,8 @@
 #endif
 
 #define STANDARD_BLOCK 200
-#define TINY_ALLOCS 10
-#define SMALL_ALLOCS 10
+#define TINY_ALLOCS 100
+#define SMALL_ALLOCS 100
 
 #define TINY_SIZE 64
 #define SMALL_SIZE 1024

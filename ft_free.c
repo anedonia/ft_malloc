@@ -24,27 +24,28 @@ void remove_chunk(t_meta_chunk **head, t_meta_chunk *chunk){
 	}
 }
 
-int remove_block(t_meta_chunk **head, t_meta_chunk *to_remove, size_t nbpage)
+int remove_block(t_meta_chunk **head, t_meta_chunk *to_remove, t_meta_chunk *next, size_t nbpage)
 {
 	int res = 1;
-	t_meta_chunk *swap_chunk = (t_meta_chunk *)((char *)to_remove + (nbpage * PAGESIZE));
-	t_meta_chunk *end_test = (t_meta_chunk *)((char *)to_remove + (nbpage * PAGESIZE)- (to_remove->size + 32));
+	// t_meta_chunk *end_test = (t_meta_chunk *)((char *)to_remove + (nbpage * PAGESIZE)- (to_remove->size + 32));
+	// printf("to_remove : %p, swap_chunk : %p, head : %p **head : %p\n", to_remove, next, *head, head);
+	// printf("next            : %d : %ld : next->next %p : next %p\n", next->free, next->size, next->next, next);
 
-
+	printf("trying to remove a block\n");
 	if (*head == NULL || to_remove == NULL)
 		return res;
-	if (!end_test->next)
+	if (!next)
 	{
-		res = 0;
+		printf("trying to remove last block\n");
+		return res;
 	}
 	else if (to_remove == *head)
 	{
-		ft_printf("head swap\n");
-		*head = swap_chunk;
+		ft_printf("no head removal\n");
+		return res;
 	}
 	else
 	{
-		ft_printf("\n\nno head change\n");
 		t_meta_chunk *prev = *head;
 		t_meta_chunk *temp_l = (*head)->next;
 		while (temp_l != NULL && temp_l != to_remove)
@@ -54,16 +55,18 @@ int remove_block(t_meta_chunk **head, t_meta_chunk *to_remove, size_t nbpage)
 		}
 		if (!temp_l)
 			return res;
-		prev->next = swap_chunk;
+		// printf("prev data : %d : %ld : prev->next %p : prev %p\n", prev->free, prev->size, prev->next, prev);
+		prev->next = next;
 	}
-	
+
 	ft_printf("freeing one page\n");
 	if (munmap(to_remove, nbpage * PAGESIZE) != 0)
 	{
 		ft_printf("munmap failed in block removing\n");
 		return res;
 	}
-	chunk_base.mem_in_use -= nbpage * PAGESIZE;
+	// show_alloc_mem_chunk();
+	chunk_base.mem_in_use -= PAGESIZE;
 	return res; 
 }
 
@@ -74,7 +77,7 @@ void defrag_mem(t_meta_chunk **head){
 	int i;
 
     while (current != NULL && current->next != NULL) {
-        if ((uintptr_t)current % PAGESIZE == 0 && current->free) {
+        if ((uintptr_t)current % PAGESIZE == 0 && current->free && current != *head) {
 			temp = current;
 			i = 0;
             while (current != NULL && current->free) {
@@ -82,9 +85,8 @@ void defrag_mem(t_meta_chunk **head){
                 current = current->next;
 
 				if (i * data_size / PAGESIZE == 1){
-					if (!remove_block(head, temp, 1))
-						return;
-					break;
+					// printf("current : %p current-next : %p\n", current, current->next);
+					remove_block(head, temp, current, 1);
 				}
 				if (i * (data_size) / PAGESIZE > 1)
 					break;
@@ -144,22 +146,22 @@ void free(void *ptr){
 		if (munmap(chunk, chunk->size) != 0)
 			return;
 	}
-	if (number_chunks(chunk_base.tiny_chunk_list) > 50)
 	// if (chunk_base.large_threshold < chunk_base.mem_in_use)
+	if (number_chunks(chunk_base.small_chunk_list) > 1000)
 	{
-		// printf("chunk nb before : %d\n",number_chunks(chunk_base.tiny_chunk_list));
-		// printf("chunk nb before : %d\n",number_chunks(chunk_base.small_chunk_list));
-		// print_chunks(chunk_base.tiny_chunk_list);
-		// print_chunks(chunk_base.small_chunk_list);
+		printf("chunk nb before : %d\n",number_chunks(chunk_base.tiny_chunk_list));
+		printf("chunk nb before : %d\n",number_chunks(chunk_base.small_chunk_list));
+		print_chunks(chunk_base.tiny_chunk_list);
+		print_chunks(chunk_base.small_chunk_list);
 		if (chunk_base.tiny_chunk_list)
 			defrag_mem(&chunk_base.tiny_chunk_list);
 		if (chunk_base.small_chunk_list)
 			defrag_mem(&chunk_base.small_chunk_list);
 		// chunk_base.large_threshold *= 1.1;
 
-		// printf("chunk nb after : %d\n",number_chunks(chunk_base.tiny_chunk_list));
-		// printf("chunk nb after : %d\n",number_chunks(chunk_base.small_chunk_list));
-		// print_chunks(chunk_base.tiny_chunk_list);
-		// print_chunks(chunk_base.small_chunk_list);
+		printf("chunk nb after : %d\n",number_chunks(chunk_base.tiny_chunk_list));
+		printf("chunk nb after : %d\n",number_chunks(chunk_base.small_chunk_list));
+		print_chunks(chunk_base.tiny_chunk_list);
+		print_chunks(chunk_base.small_chunk_list);
 	}
 }
