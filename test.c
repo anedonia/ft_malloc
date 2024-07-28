@@ -415,23 +415,24 @@ extern int number_chunks(t_meta_chunk *head);
 
 int main(void) {
 
-    int *ptr_1 = malloc(sizeof(int));
-	    int *ptr_2 = malloc(sizeof(int));
-    int *ptr_3 = malloc(sizeof(int));
-    int *ptr_4 = malloc(sizeof(int));
-	free(ptr_1);
-	free(ptr_2);
-	free(ptr_3);
-	free(ptr_4);
+    // int *ptr_1 = malloc(sizeof(int));
+	//     int *ptr_2 = malloc(sizeof(int));
+    // int *ptr_3 = malloc(sizeof(int));
+    // int *ptr_4 = malloc(sizeof(int));
+	// free(ptr_1);
+	// free(ptr_2);
+	// free(ptr_3);
+	// free(ptr_4);
 	show_alloc_mem();
-    int_tests();
-    free_tests();
-	reuse_freed_chunks_test();
-	small_size_alloc_tests();
-	big_alloc_tests();
-	edge_case_tests();
-	realloc_tests();
+    // int_tests();
+    // free_tests();
+	// reuse_freed_chunks_test();
+	// small_size_alloc_tests();
+	// big_alloc_tests();
+	// edge_case_tests();
+	// realloc_tests();
 	large_allocation_test();
+	show_alloc_mem();
 	show_alloc_mem_chunk();
 
 	// printf("chunk nb after : %d\n", number_chunks(chunk_base.tiny_chunk_list));
