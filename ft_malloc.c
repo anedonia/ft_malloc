@@ -143,7 +143,7 @@ t_meta_chunk *find_chunck(size_t size){
 		current->free = 0;
 	}
 	if (!current && size <= 1024 - 32){
-		ft_printf("adding block\n");
+		// ft_printf("adding block\n");
 		if (size <= TINY_SIZE - 32)
 			current = add_block(chunk_base.tiny_chunk_list, TINY_SIZE);
 		else

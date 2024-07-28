@@ -144,8 +144,8 @@ void free(void *ptr){
 		if (munmap(chunk, chunk->size) != 0)
 			return;
 	}
-	// if (number_chunks(chunk_base.tiny_chunk_list) > 50)
-	if (chunk_base.large_threshold < chunk_base.mem_in_use)
+	if (number_chunks(chunk_base.tiny_chunk_list) > 50)
+	// if (chunk_base.large_threshold < chunk_base.mem_in_use)
 	{
 		// printf("chunk nb before : %d\n",number_chunks(chunk_base.tiny_chunk_list));
 		// printf("chunk nb before : %d\n",number_chunks(chunk_base.small_chunk_list));

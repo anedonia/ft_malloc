@@ -2,9 +2,19 @@
 
 extern t_base chunk_base;
 
-t_meta_chunk *add_block(t_meta_chunk *last, size_t size)
-{
+t_meta_chunk *last_chunk(t_meta_chunk *head){
+	t_meta_chunk *current;
+	current = head;
 
+	while (current && current->next){
+		current = current->next;
+	}
+	return current;
+}
+
+t_meta_chunk *add_block(t_meta_chunk *head, size_t size)
+{
+	t_meta_chunk *last = last_chunk(head);
 	t_meta_chunk *chunk;
 
 	size_t total_chunk_size =  size * STANDARD_BLOCK;

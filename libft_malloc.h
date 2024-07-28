@@ -19,7 +19,7 @@
 #error "Unsupported operating system"
 #endif
 
-#define STANDARD_BLOCK 100
+#define STANDARD_BLOCK 200
 #define TINY_ALLOCS 10
 #define SMALL_ALLOCS 10
 
