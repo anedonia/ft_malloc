@@ -58,19 +58,13 @@ test: all
 mtest: all
 	@$(CC) -Wall -Werror -Wextra -g3 -c test.c
 	@$(CC) -Wall -Werror -Wextra -g3 test.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
-	ulimit -v 51200; ./$@ $(TARGET) # ca represente 5 000 000 bytes
+	ulimit -v 51200; ./$@ $(TARGET) # 51 200 kb --> 51 200 000 bytes il faut enlever un zero pour tester le fail case
 	@rm -f test.o $@
 
 gtest: all
 	@$(CC) -Wall -Werror -Wextra -g3 -c test.c
 	@$(CC) -Wall -Werror -Wextra -g3 test.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
 	gdb ./$@ $(TARGET)
-	@rm -f test.o $@
-
-vtest: all
-	@$(CC) -Wall -Werror -Wextra -g3 -c test.c
-	@$(CC) -Wall -Werror -Wextra -g3 test.o -o $@ -L. -lft_malloc_$(HOSTTYPE) -Wl,-rpath,.
-	valgrind -s --leak-check=full ./$@ $(TARGET)
 	@rm -f test.o $@
 
 # Clean up all generated files, including the static library

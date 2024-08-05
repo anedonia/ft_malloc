@@ -182,7 +182,6 @@ void *malloc(size_t size) {
 	t_meta_chunk *chunk = NULL;
 
 	chunk = find_chunck(size);
-	ft_printf("size : %d\n", size);
 	if (!chunk)
 		chunk = add_chunk(size);
 	if (chunk){
