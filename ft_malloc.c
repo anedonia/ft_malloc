@@ -134,7 +134,7 @@ t_meta_chunk *find_chunck(size_t size){
 		current = chunk_base.tiny_chunk_list;
 	else if (size <= SMALL_SIZE - 32)
 		current = chunk_base.small_chunk_list;
-	else
+	else 
 		current = chunk_base.large_chunk_list;
 	while (current && !(current->free && current->size >= size)){
 		current = current->next;
@@ -182,7 +182,7 @@ void *malloc(size_t size) {
 	t_meta_chunk *chunk = NULL;
 
 	chunk = find_chunck(size);
-	// ft_printf("size : %d\n", size);
+	ft_printf("size : %d\n", size);
 	if (!chunk)
 		chunk = add_chunk(size);
 	if (chunk){

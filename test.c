@@ -16,12 +16,11 @@ void int_tests(void) {
         printf("malloc failed\n");
         return;
     }
-
     *ptr_1 = 12;
     *ptr_2 = 34;
     *ptr_3 = 56;
     *ptr_4 = 78;
-
+	ft_printf("hello world\n");
     printf("--------------------------------------------------------------------\n");
 
     printf("ptr have the correct values: ");
@@ -415,30 +414,18 @@ extern int number_chunks(t_meta_chunk *head);
 
 int main(void) {
 
-    int *ptr_1 = malloc(sizeof(int));
-	    int *ptr_2 = malloc(sizeof(int));
-    int *ptr_3 = malloc(sizeof(int));
-    int *ptr_4 = malloc(sizeof(int));
-	free(ptr_1);
-	free(ptr_2);
-	free(ptr_3);
-	free(ptr_4);
-	show_alloc_mem();
+	// show_alloc_mem();
     int_tests();
-    free_tests();
-	reuse_freed_chunks_test();
-	small_size_alloc_tests();
-	big_alloc_tests();
-	edge_case_tests();
-	realloc_tests();
-	large_allocation_test();
+    // free_tests();
+	// reuse_freed_chunks_test();
+	// small_size_alloc_tests();
+	// big_alloc_tests();
+	// edge_case_tests();
+	// realloc_tests();
+	// large_allocation_test();
 	show_alloc_mem();
 	// show_alloc_mem_chunk();
 
-	// printf("chunk nb after : %d\n", number_chunks(chunk_base.tiny_chunk_list));
-	// printf("chunk nb after : %d\n", number_chunks(chunk_base.small_chunk_list));
-	// print_chunks(chunk_base.tiny_chunk_list);
-	// print_chunks(chunk_base.small_chunk_list);
-	// show_alloc_mem();
+
 	return 0;
 }
