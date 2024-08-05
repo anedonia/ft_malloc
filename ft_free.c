@@ -28,12 +28,9 @@ int remove_block(t_meta_chunk **head, t_meta_chunk *to_remove, t_meta_chunk *nex
 {
 	int res = 1;
 
-	if (*head == NULL || to_remove == NULL)
+	if (*head == NULL || to_remove == NULL || !next || to_remove == *head){
 		return res;
-	if (!next)
-		return res;
-	else if (to_remove == *head)
-		return res;
+	}
 	else
 	{
 		t_meta_chunk *prev = *head;
@@ -43,17 +40,17 @@ int remove_block(t_meta_chunk **head, t_meta_chunk *to_remove, t_meta_chunk *nex
 			prev = temp_l;
 			temp_l = temp_l->next;
 		}
-		if (!temp_l)
+		if (!temp_l){
 			return res;
+		}
 		prev->next = next;
 	}
-
 	if (munmap(to_remove, nbpage * PAGESIZE) != 0)
 	{
 		ft_printf("munmap failed in block removing\n");
 		return res;
 	}
-	chunk_base.mem_in_use -= PAGESIZE;
+	chunk_base.mem_in_use -= nbpage * PAGESIZE;
 	return res; 
 }
 
@@ -64,19 +61,18 @@ void defrag_mem(t_meta_chunk **head){
 	int i;
 
     while (current != NULL && current->next != NULL) {
-        if ((uintptr_t)current % PAGESIZE == 0 && current->free && current != *head) {
+        if ((uintptr_t)current % PAGESIZE == 0 && current->free) {
 			temp = current;
 			i = 0;
             while (current != NULL && current->free) {
-                i++;
-                current = current->next;
-
-				if (i * data_size / PAGESIZE == 1){
+				i++;
+				if (current && i * data_size / PAGESIZE == 1 && (uintptr_t)current % PAGESIZE == 0){
 					remove_block(head, temp, current, 1);
-				}
-				if (i * (data_size) / PAGESIZE > 1)
 					break;
-            }
+				}
+				current = current->next;
+			}
+
 		}
 		else
 			current = current->next;

@@ -187,7 +187,6 @@ void small_size_alloc_tests(void) {
 
     ft_printf("--------------------------------------------------------------------\n");
 
-	// show_alloc_mem_chunk();
     // Free the allocated memory
     for (size_t i = 0; i < num_allocs; i++) {
         free(pointers[i]);
@@ -422,6 +421,9 @@ int main(void) {
 	edge_case_tests();
 	realloc_tests();
 	large_allocation_test();
+	show_alloc_mem_overview();
+	// large_allocation_test();
+	// show_alloc_mem_overview();
 	// show_alloc_mem();
 	// show_alloc_mem_chunk();
 

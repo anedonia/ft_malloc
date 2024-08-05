@@ -136,3 +136,73 @@ void show_alloc_mem_chunk()
 			  chunk_base.mem_in_use / PAGESIZE);
 	ft_printf("--------------------------------------------------------------------\n");
 }
+
+void show_alloc_mem_overview()
+{
+		size_t i = 0;
+		int total;
+		total = 0;
+		t_meta_chunk *current = NULL;
+		current = chunk_base.tiny_chunk_list;
+		ft_printf("--------------------------------------------------------------------\n");
+		ft_printf("TINY : 0X%X\n", current);
+		while (current)
+		{
+			if (!current->free || !current->next || i == 0)
+			{
+				void *data_ptr = (void *)((char *)current + sizeof(t_meta_chunk));
+				data_ptr = align_memory(data_ptr);
+				ft_printf("0X%X - 0X%X : %d bytes --%u, free: %d\n",
+						  (char *)data_ptr,
+						  (char *)data_ptr + current->size,
+						  current->size, i,
+						  current->free);
+			}
+			total += current->size;
+			current = current->next;
+			i++;
+		}
+		i = 0;
+		current = chunk_base.small_chunk_list;
+		ft_printf("SMALL : 0X%X\n", current);
+		while (current)
+		{
+			if (!current->free || !current->next || i == 0)
+			{
+				void *data_ptr = (void *)((char *)current + sizeof(t_meta_chunk));
+				data_ptr = align_memory(data_ptr);
+				ft_printf("0X%X - 0X%X : %d bytes --%u, free: %d\n",
+						  (char *)data_ptr,
+						  (char *)data_ptr + current->size,
+						  current->size, i,
+						  current->free);
+			}
+			total += current->size;
+			current = current->next;
+			i++;
+		}
+		i = 0;
+		current = chunk_base.large_chunk_list;
+		ft_printf("LARGE : 0X%X\n", current);
+		while (current)
+		{
+			if (!current->free || !current->next || i == 0)
+			{
+				void *data_ptr = (void *)((char *)current + sizeof(t_meta_chunk));
+				data_ptr = align_memory(data_ptr);
+				ft_printf("0X%X - 0X%X : %u bytes --%u, free: %d\n",
+						  (char *)data_ptr,
+						  (char *)data_ptr + current->size,
+						  current->size, i,
+						  current->free);
+			}
+			total += current->size;
+			current = current->next;
+			i++;
+		}
+		ft_printf("\nTotal			: %d bytes\n", total);
+		ft_printf("Total mem in use	: %d bytes in %d pages\n",
+			chunk_base.mem_in_use,
+			chunk_base.mem_in_use / PAGESIZE );
+		ft_printf("--------------------------------------------------------------------\n");
+}

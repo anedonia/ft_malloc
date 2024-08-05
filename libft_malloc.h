@@ -57,6 +57,7 @@ void			init_chunks_list(void *ptr, t_meta_chunk **head , size_t size, size_t nb_
 void			show_alloc_mem_chunk();
 int				init_base(void);
 void			defrag_mem(t_meta_chunk **head);
+void			show_alloc_mem_overview();
 
 //subject
 void	show_alloc_mem();
